@@ -8,7 +8,7 @@ const StyledComparisonCard = styled.div<{ $bg: color | undefined }>`
     flex-direction: column;
 `
 
-const ComparisonCard = ({ name, image }: { name: string, image: string }) => {
+const ComparisonCard = ({ name, image, resolver }: { name: string, image: string, resolver: Function | null }) => {
     const imgRef = useRef<HTMLImageElement>(null);
     const [bg, setBG] = useState<color>();
 
@@ -33,7 +33,7 @@ const ComparisonCard = ({ name, image }: { name: string, image: string }) => {
     }
 
     return (
-        <StyledComparisonCard $bg={bg}>
+        <StyledComparisonCard $bg={bg} onClick={resolver ? () => resolver() : () => console.log("No resolver for comparison.")}>
             {name}
             <img src={image} alt={name} ref={imgRef} />
         </StyledComparisonCard>
