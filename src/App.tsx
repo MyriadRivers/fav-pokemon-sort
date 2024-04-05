@@ -1,6 +1,7 @@
 import { Pokemon, PokemonClient } from 'pokenode-ts';
 import { useEffect, useRef, useState } from 'react';
 import Comparison from './components/Comparison';
+import ReadyIndicator from './components/ReadyIndicator';
 
 const api = new PokemonClient();
 
@@ -16,15 +17,17 @@ const shuffle = (arr: Array<number>) => {
 function App() {
   const [totalPokemon, setTotalPokemon] = useState(0);
   const [unsortedIDs, setUnsortedIDs] = useState<Array<number> | null>(null);
+
   const [pokemonA, setPokemonA] = useState<{ name: string, image: string } | null>(null);
   const [pokemonB, setPokemonB] = useState<{ name: string, image: string } | null>(null);
-  const [comparisonResolver, setComparisonResolver] = useState<Function>();
 
-  const sortedList = useRef<Array<number>>([]);
+  const [comparisonReady, setComparisonReady] = useState<boolean>(false);
+  const [comparisonResolver, setComparisonResolver] = useState<Function>();
 
   const resolveComparison = async (): Promise<number> => {
     return new Promise((resolve) => {
       setComparisonResolver(() => (pokemon: string, num: number) => {
+        setComparisonReady(false);
         console.log(pokemon);
         resolve(num);
       });
@@ -39,6 +42,7 @@ function App() {
       let pokeB = await api.getPokemonById(b);
       if (pokeA.sprites.other?.['official-artwork'].front_default) setPokemonA({ name: pokeA.name, image: pokeA.sprites.other?.['official-artwork'].front_default });
       if (pokeB.sprites.other?.['official-artwork'].front_default) setPokemonB({ name: pokeB.name, image: pokeB.sprites.other?.['official-artwork'].front_default });
+      setComparisonReady(true);
       let comp = await resolveComparison();
       return comp;
     }
@@ -122,6 +126,7 @@ function App() {
 
   return (
     <div className="App">
+      <ReadyIndicator ready={comparisonReady} />
       <Comparison pokemonA={pokemonA} pokemonB={pokemonB} resolver={comparisonResolver ? comparisonResolver : null} />
     </div>
   );
