@@ -2,13 +2,18 @@ import ColorThief, { color } from "@neutrixs/colorthief";
 import { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 
-const StyledComparisonCard = styled.div<{ $bg: color | undefined }>`
+const StyledComparisonCard = styled.div<{ $bg: color | undefined, $active: boolean }>`
     background: ${props => props.$bg ? `rgb(${props.$bg[0]}, ${props.$bg[1]}, ${props.$bg[2]})` : "white"};
     display: flex;
     flex-direction: column;
+    pointer-events: ${props => props.$active ? "auto" : "none"};
+
+    &:hover {
+        cursor: pointer;
+    }
 `
 
-const ComparisonCard = ({ name, image, resolver }: { name: string, image: string, resolver: Function | null }) => {
+const ComparisonCard = ({ name, image, resolver, active }: { name: string, image: string, resolver: Function | null, active: boolean }) => {
     const imgRef = useRef<HTMLImageElement>(null);
     const [bg, setBG] = useState<color>();
 
@@ -33,7 +38,7 @@ const ComparisonCard = ({ name, image, resolver }: { name: string, image: string
     }
 
     return (
-        <StyledComparisonCard $bg={bg} onClick={resolver ? () => resolver() : () => console.log("No resolver for comparison.")}>
+        <StyledComparisonCard $bg={bg} $active={active} onClick={resolver ? () => resolver() : () => console.log("No resolver for comparison.")}>
             {name}
             <img src={image} alt={name} ref={imgRef} />
         </StyledComparisonCard>

@@ -14,6 +14,24 @@ const shuffle = (arr: Array<number>) => {
   }
 }
 
+const mSort = (arr: Array<number>) => {
+  const split = (arr: Array<number>) => {
+
+  }
+
+  let stack: Array<{ array: Array<number>, sorted: boolean }> = [];
+  stack.push({ array: arr, sorted: false });
+  while (stack.length > 0) {
+    while (!stack[-1].sorted || stack[-1].array.length > 1) {
+      let midpoint = Math.floor(stack[-1].array.length / 2);
+      let left = stack[-1].array.slice(0, midpoint);
+      let right = stack[-1].array.slice(midpoint);
+      stack.push({ array: right, sorted: false });
+      stack.push({ array: left, sorted: false });
+    }
+  }
+}
+
 function App() {
   const [totalPokemon, setTotalPokemon] = useState(0);
   const [unsortedIDs, setUnsortedIDs] = useState<Array<number> | null>(null);
@@ -54,7 +72,7 @@ function App() {
 
       while (l < left.length && r < right.length) {
         let comparison = await comparePokemon(left[l], right[r]);
-        if (comparison !== 1) {
+        if (comparison === 1) {
           // Left is better
           sorted.push(left[l]);
           l++;
@@ -76,7 +94,7 @@ function App() {
     let rightside = arr.slice(midpoint);
     leftside = await mergeSort(leftside);
     rightside = await mergeSort(rightside);
-    let merged = merge(leftside, rightside);
+    let merged = await merge(leftside, rightside);
 
     return merged;
   }
@@ -85,7 +103,7 @@ function App() {
   useEffect(() => {
     const getTotalPokemon = async () => {
       let total = await api.listPokemonSpecies();
-      setTotalPokemon(4);
+      setTotalPokemon(total.count);
     }
     getTotalPokemon();
   }, [])
@@ -127,7 +145,7 @@ function App() {
   return (
     <div className="App">
       <ReadyIndicator ready={comparisonReady} />
-      <Comparison pokemonA={pokemonA} pokemonB={pokemonB} resolver={comparisonResolver ? comparisonResolver : null} />
+      <Comparison pokemonA={pokemonA} pokemonB={pokemonB} resolver={comparisonResolver ? comparisonResolver : null} ready={comparisonReady} />
     </div>
   );
 }
