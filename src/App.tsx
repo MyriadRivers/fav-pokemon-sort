@@ -1,9 +1,8 @@
-import { Pokemon, PokemonClient } from 'pokenode-ts';
+import { PokemonClient } from 'pokenode-ts';
 import { useEffect, useRef, useState } from 'react';
 import Comparison from './components/Comparison';
 import ReadyIndicator from './components/ReadyIndicator';
 import { Poke } from './types';
-import { start } from 'repl';
 
 const api = new PokemonClient();
 
@@ -16,6 +15,16 @@ const shuffle = (arr: Array<number>) => {
   }
 }
 
+const arraysEqual = (a: Array<any>, b: Array<any>): boolean  => {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] !== b[i]) {
+      return false;
+    }
+  }
+  return true;
+}
+
 function App() {
   const [totalPokemon, setTotalPokemon] = useState(0);
   const [unsortedIDs, setUnsortedIDs] = useState<Array<number> | null>(null);
@@ -26,13 +35,24 @@ function App() {
   const [comparisonReady, setComparisonReady] = useState<boolean>(false);
   const [comparisonResolver, setComparisonResolver] = useState<Function>();
 
+  // Stacks used for iterative merge sort
   const stack = useRef<Array<{seq: Array<number>, side: number}>>([]);
+  const prevStack = useRef<Array<{left: Array<number>,  right: Array<number>}>>([]);
   const doneStack = useRef<Array<{seq: Array<number>, side: number}>>([]);
 
   const leftStack = useRef<Array<Array<number>>>([]);
   const rightStack = useRef<Array<Array<number>>>([]);
+  const lrStack = useRef<Array<{seq: Array<number>, side: number}>>([]);
 
   const chosen = useRef<Array<{el: number, side: number}>>([]);
+
+  // Indices and sides used for the actual merging
+  const l = useRef<number>(0);
+  const r = useRef<number>(0);
+  const remainingL = useRef<number>(0);
+  const remainingR = useRef<number>(0);
+  const left = useRef<Array<number>>([]);
+  const right = useRef<Array<number>>([]);
 
   const resolveComparison = async (): Promise<number> => {
     return new Promise((resolve) => {
@@ -44,25 +64,141 @@ function App() {
     })
   }
 
-  const merge = async (left: Array<number>, right: Array<number>) => {
-    let l = 0;
-    let r = 0;
+  const merge = async (debug: boolean = true) => {
     let sorted = [];
 
-    while (l < left.length && r < right.length) {
-      let comparison = await comparePokemon(left[l], right[r]);
-      if (comparison === 1) {
+    while (l.current < left.current.length && r.current < right.current.length) {
+      if (debug) {
+        console.log("\nComparing " + left.current + " and " + right.current);
+        console.log("L index: " + l.current + ", R index: " + r.current);
+      }
+      let comparison = await comparePokemon(left.current[l.current], right.current[r.current]);
+      if (comparison === -1) {
         // Left is better
-        sorted.push(left[l]);
-        l++;
-      } else {
+        sorted.push(left.current[l.current]);
+        chosen.current.push({el: left.current[l.current], side: -1})
+        l.current++;
+      } else if (comparison === 1) {
         // Right is better
-        sorted.push(right[r]);
-        r++;
+        sorted.push(right.current[r.current]);
+        chosen.current.push({el: right.current[r.current], side: 1})
+        r.current++;
+      } else {
+        // Undo
+        if (l.current > 0 || r.current > 0) {
+          // Step backwards in comparing the same two sequences
+          let prev = chosen.current.pop();
+          sorted.pop();
+          if (prev) {
+            if (prev.side === -1) {
+              l.current--;
+            } else if (prev.side === 1) {
+              r.current--;
+            }
+          }
+        } else {
+          // Move to comparing the last elements of the previous two sequences
+          if (debug) console.log("Going to last two sequences...");
+      
+          if (doneStack.current.length > 0) {
+            let prev = prevStack.current.pop();
+            let prevSorted = doneStack.current.pop();
+            if (prev && prevSorted) {
+              let prevPushed = lrStack.current.pop();
+              if (prevPushed) {
+                if (prevPushed.side === -1) {
+                  leftStack.current.pop();
+                } else if (prevPushed.side === 1) {
+                  rightStack.current.pop();
+                }
+
+                while (!arraysEqual(prevPushed ? prevPushed.seq : [], prevSorted.seq)) {
+                  prevPushed = lrStack.current.pop();
+                  if (prevPushed) {
+                    if (prevPushed.side === -1) {
+                      leftStack.current.pop();
+                    } else if (prevPushed.side === 1) {
+                      rightStack.current.pop();
+                    }
+                  }
+                }
+              }
+
+              // Take off the finished sorted one from the previous comparison from the stack
+              if (prevSorted.side === -1) {
+                leftStack.current.pop();
+              } else {
+                rightStack.current.pop();
+              }
+
+              leftStack.current.push(prev.left);
+              rightStack.current.push(prev.right);
+              // prevSorted != original sequence on stack, 
+              // but it shouldn't matter because the sequences on stack should
+              // only matter for the first generation of the recursive stack
+              // to get the correct lefts and rights, but undoing already leaves a record of that?
+              stack.current.push(prevSorted);
+
+              // Start a step after so later we can take both of them back a step
+              l.current = prev.left.length;
+              r.current = prev.right.length;
+
+              // Step back to the last actual choice the user made
+              while (remainingL.current > 0 || remainingR.current > 0) {
+                let autoChosen = chosen.current.pop();
+                if (autoChosen) {
+                  if (autoChosen.side === -1) {
+                    l.current--;
+                    remainingL.current--;
+                  } else {
+                    r.current--;
+                    remainingR.current--;
+                  }
+                }
+              }
+              while (l.current >= left.current.length || r.current >= right.current.length) {
+                let autoChosen = chosen.current.pop();
+                if (autoChosen) {
+                  if (autoChosen.side === -1) {
+                    l.current--;
+                  } else {
+                    r.current--;
+                  }
+                }
+              }
+              
+              if (debug) {
+                logStacks("Finished with the UNDO");
+                console.log("\nComparing " + left.current + " and " + right.current);
+                console.log("L index: " + l.current + ", R index: " + r.current);
+              }
+              return;
+            }
+          } else {
+            console.log("No more to undo.")
+          }
+        }
       }
     }
-    if (l < left.length) sorted = [...sorted, ...left.slice(l)];
-    if (r < right.length) sorted = [...sorted, ...right.slice(r)];
+    if (l.current < left.current.length) {
+      sorted = [...sorted, ...left.current.slice(l.current)];
+      remainingL.current = 0;
+      while (l.current + remainingL.current < left.current.length) {
+        chosen.current.push({el: left.current[remainingL.current], side: -1});
+        remainingL.current++
+      }
+    }
+    if (r.current < right.current.length) {
+      sorted = [...sorted, ...right.current.slice(r.current)];
+      remainingR.current = 0;
+      while (r.current + remainingR.current < right.current.length) {
+        chosen.current.push({el: right.current[remainingR.current], side: 1});
+        remainingR.current++
+      }
+    }
+    // Only reset the L and R indices if it's done with the sequence
+    l.current = 0;
+    r.current = 0;
 
     return sorted;
   }
@@ -78,31 +214,22 @@ function App() {
     return comp;
   }
 
-  const mergeSort = async (arr: Array<number>) => {
-    if (arr.length <= 1) return arr;
-    let midpoint = Math.floor(arr.length / 2);
-    let leftSide = arr.slice(0, midpoint);
-    let rightSide = arr.slice(midpoint);
-    leftSide = await mergeSort(leftSide);
-    rightSide = await mergeSort(rightSide);
-    let merged = await merge(leftSide, rightSide);
-    return merged;
-  }
-
   const logStacks = (startingMessage: string) => {
-    function stringArr<T>(list: Array<T>) {
+    function stringArr(list: Array<any>) {
       let str = "[\n";
       for (let i = 0; i < list.length; i++) {
         str += list[i] + "\n";
       }
-      str += "\n]";
       return str;
     }
 
-    function stringSeq<T>(list: Array<{seq: Array<number>, side: number}>) {
+    function stringSeq(list: Array<any>) {
       let str = "[\n";
       for (let i = 0; i < list.length; i++) {
-        str += list[i].seq + " | " + list[i].side + "\n";
+        for (const prop in list[i]) {
+          str += ` ${prop}: ${list[i][prop]}`;
+        }
+        str += "\n";
       }
       str += "\n]";
       return str;
@@ -112,10 +239,12 @@ function App() {
     console.log("stack: " + stringSeq(stack.current));
     console.log("left stack: " + stringArr(leftStack.current));
     console.log("right stack: " + stringArr(rightStack.current));
+    console.log("lr stack: " + stringSeq(lrStack.current));
+    console.log("prev stack: " + stringSeq(prevStack.current));
     console.log("done stack: " + stringSeq(doneStack.current));
   }
 
-  const iterativeMergeSort = async (arr: Array<number>, debug: boolean = false) => {
+  const iterativeMergeSort = async (arr: Array<number>, debug: boolean = true) => {
     stack.current.push({seq: arr, side: 0});
     if (debug) logStacks("START");
     while (stack.current.length > 0) {
@@ -129,26 +258,41 @@ function App() {
           stack.current.push(left);
         } else {
           leftStack.current.push(left.seq);
+          lrStack.current.push(left);
         }
         if (right.seq.length > 1) {
           stack.current.push(right);
         } else {
           rightStack.current.push(right.seq);
+          lrStack.current.push(right);
         }
         if (debug) logStacks("AFTER SPLITTING TOP");
       }
-      let curr = stack.current.pop();
-      let left = leftStack.current.pop();
-      let right = rightStack.current.pop();
-      if (curr && left && right) {
-        let sorted = await merge(left, right);
-        if (curr.side === -1) {
-          leftStack.current.push(sorted);
-        } else if (curr.side === 1) {
-          rightStack.current.push(sorted);
+      let curr = stack.current[stack.current.length - 1];
+      left.current = leftStack.current[leftStack.current.length - 1];
+      right.current = rightStack.current[rightStack.current.length - 1];
+
+      if (curr) {
+        let sorted = await merge();
+        if (sorted) {
+          // If sorted is an array, comparison was successful
+          stack.current.pop();
+          leftStack.current.pop();
+          rightStack.current.pop();
+
+          prevStack.current.push({left: left.current, right: right.current});
+          doneStack.current.push({seq: sorted, side: curr.side});
+
+          if (curr.side === -1) {
+            leftStack.current.push(sorted);
+            lrStack.current.push({seq: sorted, side: -1});
+          } else if (curr.side === 1) {
+            rightStack.current.push(sorted);
+            lrStack.current.push({seq: sorted, side: 1});
+          }
         }
-        doneStack.current.push({seq: sorted, side: curr.side});
         if (debug) logStacks("AFTER PUSHING TO SORTED");
+        // Otherwise, it's an undo action, so just continue the loop
       } else {
         console.log("No left or right arrays available in stack.");
         break;
@@ -199,7 +343,7 @@ function App() {
   return (
     <div className="App">
       <ReadyIndicator ready={comparisonReady} />
-      <Comparison pokemonA={pokemonA} pokemonB={pokemonB} resolver={comparisonResolver ? comparisonResolver : null} ready={comparisonReady} />
+      <Comparison pokemonA={pokemonA} pokemonB={pokemonB} noUndo={chosen.current.length === 0} resolver={comparisonResolver ? comparisonResolver : null} ready={comparisonReady} />
     </div>
   );
 }
