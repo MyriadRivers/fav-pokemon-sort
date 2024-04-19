@@ -3,10 +3,10 @@ import styled from "styled-components";
 const StyledReadyIndicator = styled.div<{ $ready: boolean }>`
     background: ${props => props.$ready ? "lightgreen" : "red"};
 
-    font-size: 35pt;
+    font-size: 25pt;
     text-align: center;
 
-    padding: 20px;
+    padding: 10px;
 `
 
 const ReadyIndicator = ({ ready }: { ready: boolean }) => {

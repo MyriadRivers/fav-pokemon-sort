@@ -5,6 +5,7 @@ import ReadyIndicator from './components/ReadyIndicator';
 import { Poke } from './types';
 import GlobalStyle from './styles/globalStyles';
 import Label from './components/Label';
+import Results from './components/Results';
 
 const api = new PokemonClient();
 
@@ -30,6 +31,7 @@ const arraysEqual = (a: Array<any>, b: Array<any>): boolean => {
 function App() {
   const [totalPokemon, setTotalPokemon] = useState(0);
   const [unsortedIDs, setUnsortedIDs] = useState<Array<number> | null>(null);
+  const [sortedIDs, setSortedIDs] = useState<Array<number> | null>(null);
 
   const [pokemonA, setPokemonA] = useState<Poke | null>(null);
   const [pokemonB, setPokemonB] = useState<Poke | null>(null);
@@ -66,7 +68,7 @@ function App() {
     })
   }
 
-  const merge = async (debug: boolean = true) => {
+  const merge = async (debug: boolean = false) => {
     let sorted = [];
 
     while (l.current < left.current.length && r.current < right.current.length) {
@@ -245,7 +247,7 @@ function App() {
     console.log("done stack: " + stringSeq(doneStack.current));
   }
 
-  const iterativeMergeSort = async (arr: Array<number>, debug: boolean = true) => {
+  const iterativeMergeSort = async (arr: Array<number>, debug: boolean = false) => {
     stack.current.push({ seq: arr, side: 0 });
     if (debug) logStacks("START");
     while (stack.current.length > 0) {
@@ -327,6 +329,7 @@ function App() {
         console.log("The unsorted pokemon: " + unsortedIDs);
         let sortedPokemon = await iterativeMergeSort(unsortedIDs);
         console.log("The sorted pokemon: " + sortedPokemon);
+        setSortedIDs(sortedPokemon);
       }
       sortPokemon();
     }
@@ -347,6 +350,7 @@ function App() {
       <ReadyIndicator ready={comparisonReady} />
       <Label text={"Choose the one you like better."} />
       <Comparison pokemonA={pokemonA} pokemonB={pokemonB} noUndo={chosen.current.length === 0} resolver={comparisonResolver ? comparisonResolver : null} ready={comparisonReady} />
+      <Results ids={sortedIDs} api={api} />
     </div>
   );
 }
