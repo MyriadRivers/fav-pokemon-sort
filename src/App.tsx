@@ -276,7 +276,7 @@ function App() {
       right.current = rightStack.current[rightStack.current.length - 1];
 
       if (curr) {
-        let sorted = await merge();
+        let sorted = await merge(debug);
         if (sorted) {
           // If sorted is an array, comparison was successful
           stack.current.pop();
@@ -309,7 +309,7 @@ function App() {
     const getTotalPokemon = async () => {
       let total = await api.listPokemonSpecies();
       // setTotalPokemon(total.count);
-      setTotalPokemon(8);
+      setTotalPokemon(9);
     }
     getTotalPokemon();
   }, [])
@@ -327,7 +327,7 @@ function App() {
     if (totalPokemon > 0 && unsortedIDs) {
       const sortPokemon = async () => {
         console.log("The unsorted pokemon: " + unsortedIDs);
-        let sortedPokemon = await iterativeMergeSort(unsortedIDs);
+        let sortedPokemon = await iterativeMergeSort(unsortedIDs, true);
         console.log("The sorted pokemon: " + sortedPokemon);
         setSortedIDs(sortedPokemon);
       }
