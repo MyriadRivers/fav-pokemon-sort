@@ -123,7 +123,6 @@ function App() {
                   }
                 }
               }
-
               // Take off the finished sorted one from the previous comparison from the stack
               if (prevSorted.side === -1) {
                 leftStack.current.pop();
