@@ -1,8 +1,8 @@
 import styled from "styled-components";
 import ComparisonCard from "./ComparisonCard";
+import Button from "./Button";
 
 const StyledComparison = styled.div`
-    background: orange;
     display: flex;
     flex-direction: column;
 
@@ -24,7 +24,7 @@ const Comparison = ({ pokemonA, pokemonB, noUndo, resolver, ready }: {
                 {pokemonA && <ComparisonCard name={pokemonA.name} image={pokemonA.image} resolver={resolver ? () => resolver(pokemonA.name, -1) : null} active={ready} />}
                 {pokemonB && <ComparisonCard name={pokemonB.name} image={pokemonB.image} resolver={resolver ? () => resolver(pokemonB.name, 1) : null} active={ready} />}
             </div>
-            <button className={"undo"} disabled={noUndo} onClick={resolver ? () => resolver("UNDO", 0) : () => console.log("No resolver for comparison.")}>Undo</button>
+            <Button text={"UNDO"} disabled={noUndo} onClick={resolver ? () => resolver("UNDO", 0) : () => console.log("No resolver for comparison.")} />
         </StyledComparison>
     )
 }

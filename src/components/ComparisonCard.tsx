@@ -4,9 +4,25 @@ import styled from "styled-components";
 
 const StyledComparisonCard = styled.div<{ $bg: color | undefined, $active: boolean }>`
     background: ${props => props.$bg ? `rgb(${props.$bg[0]}, ${props.$bg[1]}, ${props.$bg[2]})` : "white"};
+    
     display: flex;
     flex-direction: column;
+    gap: 20px;
+
     pointer-events: ${props => props.$active ? "auto" : "none"};
+
+    width: 100%;
+
+    padding: 20px;
+    align-items: center;
+
+    .pokemonName {
+        font-size: 35pt;
+        text-transform: uppercase;
+    }
+
+    .pokemonImage {
+    }
 
     &:hover {
         cursor: pointer;
@@ -28,8 +44,7 @@ const ComparisonCard = ({ name, image, resolver, active }: { name: string, image
         if (imgRef.current) {
             let colorThief = new ColorThief();
             let palette = colorThief.getPalette(imgRef.current);
-            let c = palette[0];
-            setBG(lighten(c, 0.5));
+            setBG(lighten(palette[0], 0.5));
         }
     }
 
@@ -39,8 +54,8 @@ const ComparisonCard = ({ name, image, resolver, active }: { name: string, image
 
     return (
         <StyledComparisonCard $bg={bg} $active={active} onClick={resolver ? () => resolver() : () => console.log("No resolver for comparison.")}>
-            {name}
-            <img src={image} alt={name} ref={imgRef} />
+            <div className={"pokemonName"}>{name}</div>
+            <img className={"pokemonImage"} src={image} alt={name} ref={imgRef} />
         </StyledComparisonCard>
     )
 }

@@ -3,6 +3,8 @@ import { useEffect, useRef, useState } from 'react';
 import Comparison from './components/Comparison';
 import ReadyIndicator from './components/ReadyIndicator';
 import { Poke } from './types';
+import GlobalStyle from './styles/globalStyles';
+import Label from './components/Label';
 
 const api = new PokemonClient();
 
@@ -15,7 +17,7 @@ const shuffle = (arr: Array<number>) => {
   }
 }
 
-const arraysEqual = (a: Array<any>, b: Array<any>): boolean  => {
+const arraysEqual = (a: Array<any>, b: Array<any>): boolean => {
   if (a.length !== b.length) return false;
   for (let i = 0; i < a.length; i++) {
     if (a[i] !== b[i]) {
@@ -36,15 +38,15 @@ function App() {
   const [comparisonResolver, setComparisonResolver] = useState<Function>();
 
   // Stacks used for iterative merge sort
-  const stack = useRef<Array<{seq: Array<number>, side: number}>>([]);
-  const prevStack = useRef<Array<{left: Array<number>,  right: Array<number>}>>([]);
-  const doneStack = useRef<Array<{seq: Array<number>, side: number}>>([]);
+  const stack = useRef<Array<{ seq: Array<number>, side: number }>>([]);
+  const prevStack = useRef<Array<{ left: Array<number>, right: Array<number> }>>([]);
+  const doneStack = useRef<Array<{ seq: Array<number>, side: number }>>([]);
 
   const leftStack = useRef<Array<Array<number>>>([]);
   const rightStack = useRef<Array<Array<number>>>([]);
-  const lrStack = useRef<Array<{seq: Array<number>, side: number}>>([]);
+  const lrStack = useRef<Array<{ seq: Array<number>, side: number }>>([]);
 
-  const chosen = useRef<Array<{el: number, side: number}>>([]);
+  const chosen = useRef<Array<{ el: number, side: number }>>([]);
 
   // Indices and sides used for the actual merging
   const l = useRef<number>(0);
@@ -76,12 +78,12 @@ function App() {
       if (comparison === -1) {
         // Left is better
         sorted.push(left.current[l.current]);
-        chosen.current.push({el: left.current[l.current], side: -1})
+        chosen.current.push({ el: left.current[l.current], side: -1 })
         l.current++;
       } else if (comparison === 1) {
         // Right is better
         sorted.push(right.current[r.current]);
-        chosen.current.push({el: right.current[r.current], side: 1})
+        chosen.current.push({ el: right.current[r.current], side: 1 })
         r.current++;
       } else {
         // Undo
@@ -99,7 +101,7 @@ function App() {
         } else {
           // Move to comparing the last elements of the previous two sequences
           if (debug) console.log("Going to last two sequences...");
-      
+
           if (doneStack.current.length > 0) {
             let prev = prevStack.current.pop();
             let prevSorted = doneStack.current.pop();
@@ -165,7 +167,7 @@ function App() {
                   }
                 }
               }
-              
+
               if (debug) {
                 logStacks("Finished with the UNDO");
                 console.log("\nComparing " + left.current + " and " + right.current);
@@ -183,7 +185,7 @@ function App() {
       sorted = [...sorted, ...left.current.slice(l.current)];
       remainingL.current = 0;
       while (l.current + remainingL.current < left.current.length) {
-        chosen.current.push({el: left.current[remainingL.current], side: -1});
+        chosen.current.push({ el: left.current[remainingL.current], side: -1 });
         remainingL.current++
       }
     }
@@ -191,7 +193,7 @@ function App() {
       sorted = [...sorted, ...right.current.slice(r.current)];
       remainingR.current = 0;
       while (r.current + remainingR.current < right.current.length) {
-        chosen.current.push({el: right.current[remainingR.current], side: 1});
+        chosen.current.push({ el: right.current[remainingR.current], side: 1 });
         remainingR.current++
       }
     }
@@ -244,14 +246,14 @@ function App() {
   }
 
   const iterativeMergeSort = async (arr: Array<number>, debug: boolean = true) => {
-    stack.current.push({seq: arr, side: 0});
+    stack.current.push({ seq: arr, side: 0 });
     if (debug) logStacks("START");
     while (stack.current.length > 0) {
       while (leftStack.current.length === 0 || rightStack.current.length === 0) {
         let curr = stack.current[stack.current.length - 1];
         let midpoint = Math.floor(curr.seq.length / 2);
-        let left = {seq: curr.seq.slice(0, midpoint), side: -1};
-        let right = {seq: curr.seq.slice(midpoint), side: 1};
+        let left = { seq: curr.seq.slice(0, midpoint), side: -1 };
+        let right = { seq: curr.seq.slice(midpoint), side: 1 };
 
         if (left.seq.length > 1) {
           stack.current.push(left);
@@ -279,15 +281,15 @@ function App() {
           leftStack.current.pop();
           rightStack.current.pop();
 
-          prevStack.current.push({left: left.current, right: right.current});
-          doneStack.current.push({seq: sorted, side: curr.side});
+          prevStack.current.push({ left: left.current, right: right.current });
+          doneStack.current.push({ seq: sorted, side: curr.side });
 
           if (curr.side === -1) {
             leftStack.current.push(sorted);
-            lrStack.current.push({seq: sorted, side: -1});
+            lrStack.current.push({ seq: sorted, side: -1 });
           } else if (curr.side === 1) {
             rightStack.current.push(sorted);
-            lrStack.current.push({seq: sorted, side: 1});
+            lrStack.current.push({ seq: sorted, side: 1 });
           }
         }
         if (debug) logStacks("AFTER PUSHING TO SORTED");
@@ -324,7 +326,7 @@ function App() {
       const sortPokemon = async () => {
         console.log("The unsorted pokemon: " + unsortedIDs);
         let sortedPokemon = await iterativeMergeSort(unsortedIDs);
-        console.log("The sorted pokemon: " + sortedPokemon);        
+        console.log("The sorted pokemon: " + sortedPokemon);
       }
       sortPokemon();
     }
@@ -341,7 +343,9 @@ function App() {
 
   return (
     <div className="App">
+      <GlobalStyle />
       <ReadyIndicator ready={comparisonReady} />
+      <Label text={"Choose the one you like better."} />
       <Comparison pokemonA={pokemonA} pokemonB={pokemonB} noUndo={chosen.current.length === 0} resolver={comparisonResolver ? comparisonResolver : null} ready={comparisonReady} />
     </div>
   );
