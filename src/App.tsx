@@ -110,14 +110,7 @@ function App() {
             if (prev && prevSorted) {
               let prevPushed = lrStack.current.pop();
               if (prevPushed) {
-                if (prevPushed.side === -1) {
-                  leftStack.current.pop();
-                } else if (prevPushed.side === 1) {
-                  rightStack.current.pop();
-                }
-
                 while (!arraysEqual(prevPushed ? prevPushed.seq : [], prevSorted.seq)) {
-                  prevPushed = lrStack.current.pop();
                   if (prevPushed) {
                     if (prevPushed.side === -1) {
                       leftStack.current.pop();
@@ -125,12 +118,13 @@ function App() {
                       rightStack.current.pop();
                     }
                   }
+                  prevPushed = lrStack.current.pop();
                 }
               }
               // Take off the finished sorted one from the previous comparison from the stack
               if (prevSorted.side === -1) {
                 leftStack.current.pop();
-              } else {
+              } else if (prevSorted.side === 1) {
                 rightStack.current.pop();
               }
 
@@ -143,6 +137,8 @@ function App() {
               stack.current.push(prevSorted);
 
               // Start a step after so later we can take both of them back a step
+              left.current = prev.left;
+              right.current = prev.right;
               l.current = prev.left.length;
               r.current = prev.right.length;
 
@@ -153,7 +149,7 @@ function App() {
                   if (autoChosen.side === -1) {
                     l.current--;
                     remainingL.current--;
-                  } else {
+                  } else if (autoChosen.side === 1) {
                     r.current--;
                     remainingR.current--;
                   }
@@ -164,7 +160,7 @@ function App() {
                 if (autoChosen) {
                   if (autoChosen.side === -1) {
                     l.current--;
-                  } else {
+                  } else if (autoChosen.side === 1) {
                     r.current--;
                   }
                 }
@@ -202,6 +198,8 @@ function App() {
     // Only reset the L and R indices if it's done with the sequence
     l.current = 0;
     r.current = 0;
+    remainingL.current = 0;
+    remainingR.current = 0;
 
     return sorted;
   }
