@@ -15,13 +15,15 @@ const StyledComparisonCard = styled.div<{ $bg: color | undefined, $active: boole
 
     padding: 20px;
     align-items: center;
+    justify-content: center;
 
     .pokemonName {
-        font-size: 35pt;
+        font-size: 7.5vw;
         text-transform: uppercase;
     }
 
     .pokemonImage {
+        max-width: 100%;
     }
 
     &:hover {

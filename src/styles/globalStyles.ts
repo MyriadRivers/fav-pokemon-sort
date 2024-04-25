@@ -16,9 +16,16 @@ const GlobalStyle = createGlobalStyle`
              url(${AsketNarrowSvg}) format('svg');
     }
 
+    html, #root {
+        height: 100%;
+    }
+
     body {
-        background: pink;
         font-family: "Asket Narrow";
+        
+        width: 100%;
+        height: 100%;
+        
         margin: 0;
         padding: 0;
     }

@@ -2,10 +2,10 @@ import { MouseEventHandler } from "react";
 import styled from "styled-components"
 
 const StyledButton = styled.button<{ $disabled: boolean }>`
-    background: white;
+    background: teal;
 
     font-family: "Asket Narrow";
-    font-size: 35pt;
+    font-size: 7.5vw;;
     
     padding: 20px;
     border: none;

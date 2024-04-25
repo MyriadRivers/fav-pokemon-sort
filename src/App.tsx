@@ -6,8 +6,17 @@ import { Poke } from './types';
 import GlobalStyle from './styles/globalStyles';
 import Label from './components/Label';
 import Results from './components/Results';
+import styled from 'styled-components';
 
 const api = new PokemonClient();
+
+const StyledApp = styled.div`
+  height: 100%;
+  background: orange;
+  
+  display: flex;
+  flex-direction: column;
+`
 
 const shuffle = (arr: Array<number>) => {
   let currIndex = arr.length;
@@ -343,13 +352,13 @@ function App() {
   }
 
   return (
-    <div className="App">
+    <StyledApp>
       <GlobalStyle />
       <ReadyIndicator ready={comparisonReady} />
       <Label text={"Choose the one you like better."} />
       <Comparison pokemonA={pokemonA} pokemonB={pokemonB} noUndo={chosen.current.length === 0} resolver={comparisonResolver ? comparisonResolver : null} ready={comparisonReady} />
       <Results ids={sortedIDs} api={api} />
-    </div>
+    </StyledApp>
   );
 }
 

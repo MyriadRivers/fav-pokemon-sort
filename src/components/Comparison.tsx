@@ -5,9 +5,13 @@ import Button from "./Button";
 const StyledComparison = styled.div`
     display: flex;
     flex-direction: column;
+    background: pink;
+    flex: 1 1 auto;
 
     .cardHolder {
         display: flex;
+        flex: 1 1 auto;
+        background: lavender;
     }
 `
 

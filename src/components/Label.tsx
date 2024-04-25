@@ -4,7 +4,7 @@ const StyledLabel = styled.div`
     background: white;
 
     font-family: "Asket Narrow";
-    font-size: 35pt;
+    font-size: 7.5vw;
     text-align: center;
     
     padding: 20px;
