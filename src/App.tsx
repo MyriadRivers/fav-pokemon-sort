@@ -12,6 +12,7 @@ const api = new PokemonClient();
 
 const StyledApp = styled.div`
   height: 100%;
+  width: 100%;
   background: orange;
   
   display: flex;
@@ -334,7 +335,7 @@ function App() {
     if (totalPokemon > 0 && unsortedIDs) {
       const sortPokemon = async () => {
         console.log("The unsorted pokemon: " + unsortedIDs);
-        let sortedPokemon = await iterativeMergeSort(unsortedIDs, true);
+        let sortedPokemon = await iterativeMergeSort(unsortedIDs, false);
         console.log("The sorted pokemon: " + sortedPokemon);
         setSortedIDs(sortedPokemon);
       }

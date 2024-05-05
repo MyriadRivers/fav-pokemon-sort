@@ -5,6 +5,7 @@ import AsketNarrowEot from "../assets/fonts/AsketNarrow/AsketNarrowLight.eot";
 import AsketNarrowSvg from "../assets/fonts/AsketNarrow/AsketNarrowLight.svg";
 import AsketNarrowTtf from "../assets/fonts/AsketNarrow/AsketNarrowLight.ttf";
 import AsketNarrowWoff from "../assets/fonts/AsketNarrow/AsketNarrowLight.woff";
+import breakpoints from './breakpoints';
 
 const GlobalStyle = createGlobalStyle`
     @font-face {
@@ -22,6 +23,7 @@ const GlobalStyle = createGlobalStyle`
 
     body {
         font-family: "Asket Narrow";
+        font-size: max(2vw, 16pt);
         
         width: 100%;
         height: 100%;

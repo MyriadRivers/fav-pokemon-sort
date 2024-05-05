@@ -1,13 +1,12 @@
 import { MouseEventHandler } from "react";
 import styled from "styled-components"
+import breakpoints from "../styles/breakpoints";
 
 const StyledButton = styled.button<{ $disabled: boolean }>`
-    background: teal;
-
     font-family: "Asket Narrow";
-    font-size: 7.5vw;;
+    font-size: max(4vw, 16pt);
     
-    padding: 20px;
+    padding: 30px;
     border: none;
 
     &:hover {

@@ -4,26 +4,29 @@ import styled from "styled-components";
 
 const StyledComparisonCard = styled.div<{ $bg: color | undefined, $active: boolean }>`
     background: ${props => props.$bg ? `rgb(${props.$bg[0]}, ${props.$bg[1]}, ${props.$bg[2]})` : "white"};
-    
+
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    /* gap: 20px; */
 
     pointer-events: ${props => props.$active ? "auto" : "none"};
 
+    height: auto;
     width: 100%;
 
-    padding: 20px;
+    padding: 40px 0px 40px 0px;
     align-items: center;
     justify-content: center;
 
     .pokemonName {
-        font-size: 7.5vw;
         text-transform: uppercase;
+        font-size: max(4vw, 16pt);
     }
 
     .pokemonImage {
-        max-width: 100%;
+        object-fit: contain;
+        height: 100%;
+        width: 100%;
     }
 
     &:hover {
