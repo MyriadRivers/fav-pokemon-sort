@@ -5,7 +5,7 @@ const StyledReadyIndicator = styled.div<{ $ready: boolean }>`
 
     text-align: center;
 
-    padding: 10px;
+    padding: 15px;
 `
 
 const ReadyIndicator = ({ ready }: { ready: boolean }) => {

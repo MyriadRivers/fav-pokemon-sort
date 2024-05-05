@@ -6,7 +6,6 @@ import { useEffect, useRef } from "react";
 const StyledComparison = styled.div`
     display: flex;
     flex-direction: column;
-    background: pink;
     // flex: 1 1 auto;
     height: 100%;
     width: 100%;

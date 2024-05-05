@@ -5,6 +5,8 @@ import breakpoints from "../styles/breakpoints";
 const StyledButton = styled.button<{ $disabled: boolean }>`
     font-family: "Asket Narrow";
     font-size: max(4vw, 16pt);
+
+    background: ${props => props.$disabled ? "#FEADC5" : "#FE6A95"};
     
     padding: 30px;
     border: none;

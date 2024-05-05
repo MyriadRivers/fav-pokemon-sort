@@ -13,10 +13,16 @@ const api = new PokemonClient();
 const StyledApp = styled.div`
   height: 100%;
   width: 100%;
-  background: orange;
   
   display: flex;
   flex-direction: column;
+
+  .comparisonPage {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+  }
 `
 
 const shuffle = (arr: Array<number>) => {
@@ -317,7 +323,7 @@ function App() {
     const getTotalPokemon = async () => {
       let total = await api.listPokemonSpecies();
       // setTotalPokemon(total.count);
-      setTotalPokemon(9);
+      setTotalPokemon(3);
     }
     getTotalPokemon();
   }, [])
@@ -343,21 +349,14 @@ function App() {
     }
   }, [unsortedIDs]);
 
-  const getRandomPokemon = async () => {
-    let randomID = Math.ceil(Math.random() * totalPokemon);
-    let randomPokemonA = await api.getPokemonById(randomID);
-    randomID = Math.ceil(Math.random() * totalPokemon);
-    let randomPokemonB = await api.getPokemonById(randomID);
-    if (randomPokemonA.sprites.other?.['official-artwork'].front_default) setPokemonA({ name: randomPokemonA.name, image: randomPokemonA.sprites.other?.['official-artwork'].front_default });
-    if (randomPokemonB.sprites.other?.['official-artwork'].front_default) setPokemonB({ name: randomPokemonB.name, image: randomPokemonB.sprites.other?.['official-artwork'].front_default });
-  }
-
   return (
     <StyledApp>
       <GlobalStyle />
-      <ReadyIndicator ready={comparisonReady} />
-      <Label text={"Choose the one you like better."} />
-      <Comparison pokemonA={pokemonA} pokemonB={pokemonB} noUndo={chosen.current.length === 0} resolver={comparisonResolver ? comparisonResolver : null} ready={comparisonReady} />
+      <div className="comparisonPage">
+        <ReadyIndicator ready={comparisonReady} />
+        <Label text={"Choose the one you like better."} />
+        <Comparison pokemonA={pokemonA} pokemonB={pokemonB} noUndo={chosen.current.length === 0} resolver={comparisonResolver ? comparisonResolver : null} ready={comparisonReady} />
+      </div>
       <Results ids={sortedIDs} api={api} />
     </StyledApp>
   );
