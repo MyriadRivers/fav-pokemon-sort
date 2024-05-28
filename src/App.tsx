@@ -49,6 +49,8 @@ function App() {
   const [unsortedIDs, setUnsortedIDs] = useState<Array<number> | null>(null);
   const [sortedIDs, setSortedIDs] = useState<Array<number> | null>(null);
 
+  const appRef = useRef<HTMLDivElement | null>(null);
+
   const [pokemonA, setPokemonA] = useState<Poke | null>(null);
   const [pokemonB, setPokemonB] = useState<Poke | null>(null);
 
@@ -350,14 +352,14 @@ function App() {
   }, [unsortedIDs]);
 
   return (
-    <StyledApp>
+    <StyledApp ref={appRef}>
       <GlobalStyle />
       <div className="comparisonPage">
-        <ReadyIndicator ready={comparisonReady} />
+        <ReadyIndicator ready={comparisonReady} done={sortedIDs ? sortedIDs.length > 0 : false}/>
         <Label text={"Choose the one you like better."} />
         <Comparison pokemonA={pokemonA} pokemonB={pokemonB} noUndo={chosen.current.length === 0} resolver={comparisonResolver ? comparisonResolver : null} ready={comparisonReady} />
       </div>
-      <Results ids={sortedIDs} api={api} />
+      <Results ids={sortedIDs} api={api}/>
     </StyledApp>
   );
 }

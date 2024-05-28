@@ -1,5 +1,5 @@
 import { PokemonClient } from "pokenode-ts";
-import { useEffect, useState } from "react";
+import { Ref, forwardRef, useEffect, useRef, useState } from "react";
 import styled from "styled-components"
 import Result from "./Result";
 
@@ -16,6 +16,8 @@ const StyledResults = styled.div`
 `
 
 const Results = ({ ids, api }: { ids: Array<number> | null, api: PokemonClient }) => {
+    const resultsRef = useRef<HTMLDivElement | null>(null);
+    const imgRefs = useRef<Array<HTMLImageElement | null>>(ids ? ids.map(() => null) : []);
     const [results, setResults] = useState<Array<{name: string, image: string}>>([]);
 
     useEffect(() => {
@@ -33,11 +35,29 @@ const Results = ({ ids, api }: { ids: Array<number> | null, api: PokemonClient }
 
     }, [ids])
 
+    const scrollToResults = () => {
+        console.log("SCROLL!!!!");
+        if (imgRefs.current && imgRefs.current.every((imgRef) => {
+            if (imgRef) return imgRef.complete;
+            return false;
+        })) {
+            if (resultsRef.current) {
+                console.log("we loaded boiz");
+                resultsRef.current.scrollIntoView();
+            }
+        }
+    }
+
+    useEffect(() => {
+        window.addEventListener("keydown", (key) => {
+            if (key.code === "Space" && resultsRef.current) resultsRef.current.scrollIntoView();
+        })
+    }, [])
+
     return (
-        <StyledResults>
-            {results && results.map((item, i) =>
-                <Result name={item.name} image={item.image} rank={i+1}/>
-            )}
+        <StyledResults ref={resultsRef}>
+            {results && results.map((item, i) => 
+            <Result name={item.name} image={item.image} rank={i+1} key={i} ref={el => imgRefs.current[i] = el} autoScroll={scrollToResults}/>)}
         </StyledResults>
     )
 }

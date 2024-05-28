@@ -53,6 +53,33 @@ const Comparison = ({ pokemonA, pokemonB, noUndo, resolver, ready }: {
         }
     }, [])
 
+    // Arrow keys serve as hotkeys for comparison
+    useEffect(() => {
+        window.addEventListener("keydown", compareHotKey);
+        return () => {
+            window.removeEventListener("keydown", compareHotKey);
+        }
+    }, [resolver])
+
+    const compareHotKey = (e: KeyboardEvent) => {
+        if (pokemonA && pokemonB && resolver) {
+            console.log(e.code);
+            switch (e.code) {
+                case "ArrowLeft":
+                    resolver(pokemonA.name, -1);
+                    break;
+                case "ArrowRight":
+                    resolver(pokemonB.name, 1);
+                    break;
+                case "ArrowUp":
+                case "ArrowDown":
+                    resolver("UNDO", 0);
+                    break;
+                default:
+            }
+        }
+    }
+
     return (
         <StyledComparison ref={containerRef}>
             <div className={"flexContainer"} ref={flexContainerRef}>

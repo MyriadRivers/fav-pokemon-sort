@@ -1,3 +1,4 @@
+import { Ref, forwardRef } from "react";
 import styled from "styled-components";
 
 const StyledResult = styled.div`
@@ -21,14 +22,14 @@ const StyledResult = styled.div`
     }
 `
 
-const Result = ({name, image, rank}: {name: string, image: string, rank: number}) => {
+const Result = ({name, image, rank, autoScroll}: {name: string, image: string, rank: number, autoScroll: Function}, ref: Ref<HTMLImageElement>) => {
     return (
         <StyledResult>
             <div className={"rank"}>{rank}</div>
-            <img className={"resultImage"} src={image} alt={name} />
+            <img className={"resultImage"} src={image} alt={name} ref={ref} onLoad={autoScroll()}/>
             {name}
         </StyledResult>
     )
 }
 
-export default Result;
+export default forwardRef(Result);
